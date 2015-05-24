@@ -7,15 +7,15 @@ This document describes the data transformation from raw to tidy data.
 
 I. Use "getwd()" to confirm that you are in the desired directory, ie. where you would like the tidy (and raw) data to be copied into.
 
-II. Copy the scripts "run_analysis" and necessary_packages.R into this directory. 
+II. Copy the scripts "run_analysis.R" and "necessary_packages.R" into this directory. 
 
-III. (optional) Start a script "necessary_packages.R", which installs and loads all necessary packages in order to perform the script without interruption. Skip if you're sure that they are already on your computer.
+III. (optional) Start the script "necessary_packages.R", which installs and loads all necessary packages, in order to perform the script "run_analysis.R" without interruption. Skip this if you're sure that "dplyr", "plyr" and "Rcpp" packages are already installed on your RStudio/R distribution.
 
 ```{r}
 source('./necessary_packages.R')
 ```
 
-IV. start the script "run_analysis.R" which transforms the raw data into tidy data; for more information about this transformation, please keep reading.
+IV. start the script "run_analysis.R" which transforms the raw data into tidy data; for more information about this transformation, please keep reading:
 
 ```{r}
 source('./run_analysis.R')
@@ -23,7 +23,7 @@ source('./run_analysis.R')
 
 ====================================================================
 
-Description of script "run_analysis.R":
+####Description of the transformation performed by "run_analysis.R":
 
 1) The raw data files are downloaded, and extracted into a new folder "UCI HAR Dataset":
 ```{r}
@@ -32,12 +32,12 @@ unzip("UCI_HAR.zip")
 setwd("./UCI HAR Dataset")
 ```
 
-2) The activities (6 columns = 6 activities) and 561 features (the 561 columns in the main data files, see below) are loaded into R; the tbl.df (dplyr) is preferred because of better on-screen formatting: 
+2) The activities (6 columns representing the 6 activities) and 561 features (the 561 columns in the main data files, see below) are loaded into R; the tbl.df (dplyr) format is preferred because of better on-screen formatting and faster performance:  
 ```{r}
 activities <- tbl_df(read.table("activity_labels.txt"))
 features <- tbl_df(read.table("features.txt"))
 ```
-The complete list of variable names of each feature vector is available in 'features.txt'
+The complete list of the (original) variable names of each feature vector is available in 'features.txt' (raw data)
 
 3) The "features" list is cleaned-up of all special characters: 
 ```{r}
@@ -48,8 +48,8 @@ features_clean <- gsub("-", "", features_clean)
 ```
 Example: "tBodyAcc-mean()-X" becomes "tBodyAccmeanX"
 
-4) The main test as well as trianing data is loaded into R; at this point the data has 561 measurements (variables). There are 7352 datasets in the training data, and 2947 datasets in the test data. 
-The generic column names are changed to descriptive ones, pasting the features list:
+4) The main test as well as training data is loaded into R; at this point the data has 561 measurements (variables). There are 7352 datasets in the training data, and 2947 datasets in the test data. 
+The generic column names (V1, V2...) are changed to descriptive ones, pasting the features list:
 
 ```{r}
 xtrain <- tbl_df(read.table("../train/X_train.txt"))
@@ -57,20 +57,21 @@ xtest <- tbl_df(read.table("../test/X_test.txt"))
 names(xtrain)<- features_clean
 names(xtest)<- features_clean
 ```
-The column names have to be sweeped of all not allowed characters:
+The column names have to be sweeped of further not allowed characters (otherwise "select" further down, doesn't work):
 ```{r}
 column_names_corr <- make.names(names=names(xtest), unique=TRUE, allow_ = TRUE)
 names(xtest) <- column_names_corr 
 names(xtrain) <- column_names_corr 
 ```
 
-5) Within the main test and training data, we are only interested in variables related to the mean, and standard deviations:
+5) Within the main test and training data, we are only interested in variables related to the "means", and "standard deviations":
 ```{r}
-mean_std<- grep("*[mM][Ee][Aa][Nn]*|*[sS][tT][dD]*", names(xtest), value = T)
+mean_std <- grep("*[mM][Ee][Aa][Nn]*|*[sS][tT][dD]*", names(xtest), value = T)
 xtest2 <- select(xtest, match(mean_std,names(xtest)))
 xtrain2 <- select(xtrain, match(mean_std,names(xtrain)))
 ```
-The number of columns in xtest2 and xtrain2 reduces from 561 to 86.
+In this selection, the number of columns in xtest2 and xtrain2 reduces from 561 to 86.
+
 
 6) The activity IDs for both datasets are read into R, and the activity ID column is renamed to "activityId":
 ```{r}
@@ -79,7 +80,7 @@ names(ytrain) <- "activityId"
 ytest <- tbl_df(read.table("../test/y_test.txt"))
 names(ytest) <- "activityId"
 ```
-The same is done for the subject-IDs. Outputs: "subtrain" and "subtest".
+The same is done for the subject-IDs. Outputs for these are called "subtrain" and "subtest".
 
 
 7) Test and training data for the main data, activity labels and subjects ID's are combined; each has now 10299 datasets:
@@ -90,13 +91,13 @@ subjects <- bind_rows(subtrain, subtest)
 labels2 <- labels
 ```
 
-8) We put the main data, activities and subjectIDs into a combined final data frame; this frame has 88 variables (activity ID, subject ID and the 86 "mean" and "standard deviation" related variables:
+8) The main data, activities and subjectIDs are pasted into a combined final data frame, which has now 88 variables (activity ID, subject ID and the 86 "mean"- and "standard deviation"-related variables: 
 ```{r}
 finalData <- data 
 finalData$activity = labels2$activityId
 finalData$subjectId = subjects$subjectId
 ```
-Some final sorting: 
+Some final data sorting: 
 ```{r}
 finalData <- select(finalData, activity, subjectId, tBodyAccmeanX:angleZgravityMean)
 finalData2 <- tbl_df(arrange(finalData, activity, subjectId))
@@ -111,6 +112,6 @@ write.csv(allthemeans, file = "output.csv")
 write.table(allthemeans, file="output.txt", row.names=FALSE) 
 ```
 
-
+"output.txt" is uploaded for the assessment. 
 
 
