@@ -5,7 +5,19 @@ output: html_document
 
 This readme briefly describes the contents of the raw project data and the tidy project data. A detailed description of how the raw data is transformed to tidy data can be found in the code-book (codeBook.rmd): 
 
-1. Raw Data Files:
+--------------------------------------------------------------
+
+1) The tidy dataset includes the following files:
+
+- ReadMe.md: this file - describing the raw data and tidy data files.
+
+- codeBook.rmd: Detailed description of the transformation of raw data to tidy data, as performed via thefile "run_analysis.R".
+
+- run_analysis.R: the script that coverts the raw data into tidy data.
+
+--------------------------------------------------------------
+
+2) Raw Data Files:
 
 Some background:
 The data deals with Human Activity Recognition (HAR) Using Smartphones Dataset
@@ -52,11 +64,3 @@ The following files are available for the train and test data. Their description
 
 - 'train/subject_train.txt': Each row identifies the subject who performed the activity for each window sample. Its range is from 1 to 30. 
 
---------------------------------------------------------------
-2. The tidy dataset includes the following files:
-
-- ReadMe.md: this file - describing the raw data and tidy data files.
-
-- codeBook.rmd: Detailed description of the transformation of raw data to tidy data, as performed via thefile "run_analysis.R".
-
-- run_analysis.R: the script that coverts the raw data into tidy data.
