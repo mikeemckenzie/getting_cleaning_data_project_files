@@ -25,21 +25,21 @@ source('./run_analysis.R')
 
 Description of script "run_analysis.R":
 
-1. The raw data files are downloaded, and extracted into a new folder "UCI HAR Dataset":
+1) The raw data files are downloaded, and extracted into a new folder "UCI HAR Dataset":
 ```{r}
 download.file(URL, "UCI_HAR.zip")
 unzip("UCI_HAR.zip")
 setwd("./UCI HAR Dataset")
 ```
 
-2. The activities (6 columns = 6 activities) and 561 features (the 561 columns in the main data files, see below) are loaded into R; the tbl.df (dplyr) is preferred because of better on-screen formatting: 
+2) The activities (6 columns = 6 activities) and 561 features (the 561 columns in the main data files, see below) are loaded into R; the tbl.df (dplyr) is preferred because of better on-screen formatting: 
 ```{r}
 activities <- tbl_df(read.table("activity_labels.txt"))
 features <- tbl_df(read.table("features.txt"))
 ```
 The complete list of variable names of each feature vector is available in 'features.txt'
 
-3. The "features" list is cleaned-up of all special characters: 
+3) The "features" list is cleaned-up of all special characters: 
 ```{r}
 features_clean <- gsub("\\(", "", features$V2)
 features_clean <- gsub("\\)", "", features_clean)
@@ -48,7 +48,7 @@ features_clean <- gsub("-", "", features_clean)
 ```
 Example: "tBodyAcc-mean()-X" becomes "tBodyAccmeanX"
 
-4. The main test as well as trianing data is loaded into R; at this point the data has 561 measurements (variables). There are 7352 datasets in the training data, and 2947 datasets in the test data. 
+4) The main test as well as trianing data is loaded into R; at this point the data has 561 measurements (variables). There are 7352 datasets in the training data, and 2947 datasets in the test data. 
 The generic column names are changed to descriptive ones, pasting the features list:
 
 ```{r}
@@ -64,7 +64,7 @@ names(xtest) <- column_names_corr
 names(xtrain) <- column_names_corr 
 ```
 
-5. Within the main test and training data, we are only interested in variables related to the mean, and standard deviations:
+5) Within the main test and training data, we are only interested in variables related to the mean, and standard deviations:
 ```{r}
 mean_std<- grep("*[mM][Ee][Aa][Nn]*|*[sS][tT][dD]*", names(xtest), value = T)
 xtest2 <- select(xtest, match(mean_std,names(xtest)))
@@ -72,7 +72,7 @@ xtrain2 <- select(xtrain, match(mean_std,names(xtrain)))
 ```
 The number of columns in xtest2 and xtrain2 reduces from 561 to 86.
 
-6. The activity IDs for both datasets are read into R, and the activity ID column is renamed to "activityId":
+6) The activity IDs for both datasets are read into R, and the activity ID column is renamed to "activityId":
 ```{r}
 ytrain <- tbl_df(read.table("../train/y_train.txt"))
 names(ytrain) <- "activityId"
@@ -82,7 +82,7 @@ names(ytest) <- "activityId"
 The same is done for the subject-IDs. Outputs: "subtrain" and "subtest".
 
 
-7. Test and training data for the main data, activity labels and subjects ID's are combined; each has now 10299 datasets:
+7) Test and training data for the main data, activity labels and subjects ID's are combined; each has now 10299 datasets:
 ```{r}
 data <- bind_rows(xtrain2, xtest2)
 labels <- bind_rows(ytrain, ytest)
@@ -90,7 +90,7 @@ subjects <- bind_rows(subtrain, subtest)
 labels2 <- labels
 ```
 
-8. We put the main data, activities and subjectIDs into a combined final data frame; this frame has 88 variables (activity ID, subject ID and the 86 "mean" and "standard deviation" related variables:
+8) We put the main data, activities and subjectIDs into a combined final data frame; this frame has 88 variables (activity ID, subject ID and the 86 "mean" and "standard deviation" related variables:
 ```{r}
 finalData <- data 
 finalData$activity = labels2$activityId
@@ -103,7 +103,7 @@ finalData2 <- tbl_df(arrange(finalData, activity, subjectId))
 ```
 
 
-9. Finally, averages of all columns, grouped by activities and subjectIDs are taken, and written into a file "output.txt":
+9) Finally, averages of all columns, grouped by activities and subjectIDs are taken, and written into a file "output.txt":
 ```{r}
 allthemeans<-tbl_df(ddply(finalData2, .(activity, subjectId), colwise(mean)))
 allthemeans
